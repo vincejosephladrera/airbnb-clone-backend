@@ -27,7 +27,7 @@ export async function createNewAdmin(req: { body: Admin }, res: Response) {
     },
   });
 
-  const token = createJWT(admin);
+  const token = createJWT({ role: "admin", ...admin });
   res.status(200).json({ admin, token });
 }
 
@@ -42,7 +42,7 @@ export async function signInAdmin(req: { body: Admin }, res: Response) {
 
       res.status(401).send("Invalid username or password");
     }
-    const token = createJWT(admin);
+    const token = createJWT({ role: "admin", ...admin });
     res.status(200).json({ admin, token });
   }
 

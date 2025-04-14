@@ -12,26 +12,27 @@ export function hashPassword(password: string) {
   return bcrypt.hash(password, 5)
 }
 
-type Admin = {
-  email: string,
-  id: string
-}
 
-type User = {
+type CombinedUser = {
   email: string,
   id: string
+  role?: 'user' | 'admin'
 }
 
 
-export const createJWT = ({ email, id }: Admin | User) => {
+
+
+export const createJWT = ({ email, id, role = "user" }: CombinedUser) => {
 
   const token = jwt.sign(
-    { email, id },
+    { email, id, role },
     process.env.JWT_SECRET!
   );
 
   return token;
 };
+
+
 
 export const protect = (req: Request & { user?: unknown }, res: Response, next: NextFunction) => {
   const bearer = req.headers.authorization;
@@ -56,4 +57,13 @@ export const protect = (req: Request & { user?: unknown }, res: Response, next: 
     console.error(e);
     res.status(401).send("Not Authorized")
   }
+};
+
+export const requireRole = (role: "admin" | "user") => {
+  return (req: Request & { user?: any }, res: Response, next: NextFunction) => {
+    if (!req.user || req.user.role !== role) {
+      res.status(403).send("Forbidden: Access denied");
+    }
+    next();
+  };
 };

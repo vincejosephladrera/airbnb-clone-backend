@@ -1,9 +1,11 @@
 import express from 'express'
 import morgan from 'morgan';
 import cors from 'cors';
-import { protect } from './modules/auth';
 import adminRouter from './routers/admin.routes'
 import listingRouter from './routers/listing.routes';
+import userRouter from './routers/user.routes';
+
+
 
 
 
@@ -21,7 +23,8 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.use('/admin', adminRouter)
-app.use('/api', protect, listingRouter);
+app.use('/api/listings', listingRouter)
+app.use('/user', userRouter)
 
 
 
