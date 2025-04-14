@@ -2,16 +2,31 @@ import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from 'express';
 // import { Admin } from '@prisma/client'
 
+import bcrypt from 'bcrypt';
+
+export function comparePasswords(password: string, hash: string) {
+  return bcrypt.compare(password, hash)
+}
+
+export function hashPassword(password: string) {
+  return bcrypt.hash(password, 5)
+}
+
 type Admin = {
-  username: string,
-  password: string,
+  email: string,
+  id: string
+}
+
+type User = {
+  email: string,
+  id: string
 }
 
 
-export const createJWT = ({ username, password }: Admin) => {
+export const createJWT = ({ email, id }: Admin | User) => {
 
   const token = jwt.sign(
-    { username, password },
+    { email, id },
     process.env.JWT_SECRET!
   );
 
@@ -22,42 +37,23 @@ export const protect = (req: Request & { user?: unknown }, res: Response, next: 
   const bearer = req.headers.authorization;
 
   if (!bearer) {
-    res.status(401);
-    res.json({
-      error: {
-        message: "Not Authorized"
-      }
-    })
-    return;
+    res.status(401).send("Not Authorized")
   }
 
-  const [, token] = bearer.split(" ");
+  const [, token] = bearer!.split(" ");
   if (!token) {
-    res.status(401);
-    res.json({
-      error: {
-        message: "Not Authorized"
-      }
-    })
-    return;
+    res.status(401).send("Not Authorized")
   }
-
 
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_secret!);
+    const payload = jwt.verify(token, process.env.JWT_SECRET!);
     req.user = payload
     console.log(payload);
     next();
-    return;
+
   } catch (e) {
     console.error(e);
-    res.status(401);
-    res.json({
-      error: {
-        message: "Not Authorized"
-      }
-    })
-    return;
+    res.status(401).send("Not Authorized")
   }
 };
