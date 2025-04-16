@@ -15,6 +15,7 @@ export async function createNewUser(req: Request, res: Response) {
 
   if (existingUser) {
     res.status(400).json({ error: { message: "Email is already used." } })
+    return
   }
 
   const user = await prisma.user.create({
@@ -26,6 +27,7 @@ export async function createNewUser(req: Request, res: Response) {
 
   const token = createJWT(user)
   res.status(200).json({ user, token })
+  return
 }
 
 export async function signInUser(req: Request, res: Response) {
@@ -37,15 +39,18 @@ export async function signInUser(req: Request, res: Response) {
 
   if (!existingUser) {
     res.status(400).json({ error: { message: "Invalid username or password." } })
+    return
   }
 
   const isValid = await comparePasswords(req.body.password, existingUser!.password)
 
   if (!isValid) {
     res.status(400).json({ error: { message: "Invalid username or password." } })
+    return
   }
 
   const token = createJWT(existingUser!)
 
   res.status(200).json({ user: existingUser, token })
+  return
 }

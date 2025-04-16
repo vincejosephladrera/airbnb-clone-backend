@@ -18,6 +18,7 @@ export async function createNewAdmin(req: { body: Admin }, res: Response) {
 
   if (existingAdmin) {
     res.status(401).send("Email was already taken.")
+    return
   }
 
   const admin = await prisma.admin.create({
@@ -29,6 +30,7 @@ export async function createNewAdmin(req: { body: Admin }, res: Response) {
 
   const token = createJWT({ role: "admin", ...admin });
   res.status(200).json({ admin, token });
+  return
 }
 
 export async function signInAdmin(req: { body: Admin }, res: Response) {
@@ -41,14 +43,16 @@ export async function signInAdmin(req: { body: Admin }, res: Response) {
     if (!isValid) {
 
       res.status(401).send("Invalid username or password");
+      return
     }
     const token = createJWT({ role: "admin", ...admin });
     res.status(200).json({ admin, token });
+    return
   }
 
 
   res.status(401).send("Invalid username or password");
-
+  return
 }
 
 
